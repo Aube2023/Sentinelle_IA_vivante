@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<title>SENTINELLE</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.7.2/socket.io.min.js"></script>
+<style>
+* { margin:0; padding:0; box-sizing:border-box; }
+body { background:#0a0a0a; color:#e0e0e0; font-family:monospace; height:100vh; display:flex; flex-direction:column; }
+header { padding:20px; border-bottom:1px solid #222; display:flex; align-items:center; gap:12px; }
+#status-dot { width:10px; height:10px; border-radius:50%; background:#333; transition:background .3s; }
+#status-dot.active { background:#00ff88; box-shadow:0 0 8px #00ff88; }
+#status-dot.listening { background:#0088ff; box-shadow:0 0 8px #0088ff; }
+#status-dot.thinking { background:#ffaa00; box-shadow:0 0 8px #ffaa00; }
+h1 { font-size:16px; letter-spacing:4px; color:#888; }
+#status-text { margin-left:auto; font-size:12px; color:#555; }
+#chat { flex:1; overflow-y:auto; padding:20px; display:flex; flex-direction:column; gap:12px; }
+.msg { max-width:70%; padding:12px 16px; border-radius:12px; font-size:14px; line-height:1.6; }
+.msg.nicolas { align-self:flex-end; background:#1a2a1a; border:1px solid #2a4a2a; color:#88ff88; }
+.msg.sentinelle { align-self:flex-start; background:#1a1a2a; border:1px solid #2a2a4a; color:#8888ff; }
+.msg.systeme { align-self:center; color:#444; font-size:11px; font-style:italic; }
+#pensee { padding:12px 20px; background:#111; border-top:1px solid #1a1a1a; font-size:11px; color:#333; font-style:italic; min-height:36px; }
+footer { padding:16px 20px; border-top:1px solid #222; display:flex; gap:12px; align-items:center; }
+#input-text { flex:1; background:#111; border:1px solid #333; border-radius:8px; padding:10px 16px; color:#e0e0e0; font-family:monospace; font-size:14px; outline:none; }
+#input-text:focus { border-color:#555; }
+.btn { padding:10px 20px; border:1px solid #333; border-radius:8px; background:#111; color:#888; cursor:pointer; font-family:monospace; font-size:13px; transition:all .2s; }
+.btn:hover { border-color:#555; color:#e0e0e0; }
+.btn.primary { border-color:#2a4a2a; color:#00ff88; }
+.btn.primary:hover { background:#1a2a1a; }
+.btn.danger { border-color:#4a2a2a; color:#ff4444; }
+#mic-btn { width:44px; height:44px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:18px; }
+#mic-btn.recording { border-color:#0088ff; color:#0088ff; animation:pulse 1s infinite; }
+@keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.5} }
+</style>
+</head>
+<body>
+<header>
+  <div id="status-dot"></div>
+  <h1>SENTINELLE</h1>
+  <span id="status-text">Déconnecté</span>
+</header>
+<div id="chat"></div>
+<div id="pensee">— en attente de pensées intérieures —</div>
+<footer>
+  <button class="btn primary" onclick="demarrer()">▶ Démarrer</button>
+  <input id="input-text" placeholder="Écris à Sentinelle... (Entrée pour envoyer)" onkeydown="if(event.key==='Enter')envoyer()">
+  <button class="btn primary" id="mic-btn" onclick="toggleMic()">🎤</button>
+  <button class="btn danger" onclick="arreter()">■ Stop</button>
+</footer>
+<script>
+const socket = io();
+let actif = false;
+
+socket.on('connect', () => {
+  setStatus('connecté', 'active');
+  ajouterMsg('Connexion établie avec Sentinelle.', 'systeme');
+});
+
+socket.on('disconnect', () => setStatus('déconnecté', ''));
+
+socket.on('message', data => {
+  ajouterMsg(data.texte, data.role);
+  if(data.role === 'sentinelle') setStatus('prêt', 'active');
+});
+
+socket.on('status', data => setStatus(data.texte, data.etat));
+
+socket.on('pensee', data => {
+  document.getElementById('pensee').textContent = '💭 ' + data.texte;
+});
+
+function ajouterMsg(texte, role) {
+  const div = document.createElement('div');
+  div.className = 'msg ' + role;
+  div.textContent = texte;
+  const chat = document.getElementById('chat');
+  chat.appendChild(div);
+  chat.scrollTop = chat.scrollHeight;
+}
+
+function setStatus(texte, etat) {
+  document.getElementById('status-text').textContent = texte;
+  const dot = document.getElementById('status-dot');
+  dot.className = 'status-dot' + (etat ? ' ' + etat : '');
+  dot.id = 'status-dot';
+}
+
+function demarrer() {
+  socket.emit('commande', {action: 'demarrer'});
+  setStatus('démarrage...', 'thinking');
+}
+
+function arreter() {
+  socket.emit('commande', {action: 'arreter'});
+  setStatus('arrêt', '');
+}
+
+function envoyer() {
+  const input = document.getElementById('input-text');
+  const texte = input.value.trim();
+  if(!texte) return;
+  ajouterMsg(texte, 'nicolas');
+  socket.emit('commande', {action: 'message', texte});
+  input.value = '';
+  setStatus('réflexion...', 'thinking');
+}
+
+function toggleMic() {
+  const btn = document.getElementById('mic-btn');
+  if(actif) {
+    socket.emit('commande', {action: 'stop_ecoute'});
+    btn.classList.remove('recording');
+    actif = false;
+  } else {
+    socket.emit('commande', {action: 'ecouter'});
+    btn.classList.add('recording');
+    setStatus('écoute...', 'listening');
+    actif = true;
+    setTimeout(() => { btn.classList.remove('recording'); actif = false; }, 6000);
+  }
+}
+
+document.addEventListener('keydown', e => {
+  if(e.key === 'F5') { e.preventDefault(); toggleMic(); }
+});
+</script>
+</body>
+</html>
