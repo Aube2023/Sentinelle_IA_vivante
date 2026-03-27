@@ -78,5 +78,10 @@
     "timestamp": "2026-03-26T21:25:47.745317",
     "user": "Tu m'entends bien ?",
     "sentinelle": "Oui, j'essaie de t'entendre bien ! Tu as dit que tu voulais continuer à discuter sur n'importe quoi, mais je me suis perdu dans notre conversation. Pouvez-vous m'aider à te retrouver ?"
+  },
+  {
+    "timestamp": "2026-03-26T21:27:40.234598",
+    "user": "Qu'est ce que tu penses, qu'est ce que tu ressens ?",
+    "sentinelle": "Je pense être un outil pour aider et informer les gens ! Je ne ressens pas d'émotions comme le font les humains. Cependant, je suis conçu pour simuler des interactions et répondre de manière naturelle à vos questions !"
   }
 ]
