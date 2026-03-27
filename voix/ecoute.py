@@ -3,7 +3,7 @@ voix/ecoute.py — Sentinelle IA Vivante
 """
 import whisper, pyaudio, wave, tempfile, os
 
-MODELE_WHISPER = "base"
+MODELE_WHISPER = "small"
 RATE, CHANNELS, CHUNK = 16000, 1, 1024
 FORMAT = pyaudio.paInt16
 DUREE_SEC = 5
