@@ -38,7 +38,7 @@ def repondre(message: str, memoire: list, contexte_extra: str = "") -> str:
     reponse = ""
     buffer = ""
     for chunk in ollama.chat(
-        model="llama3.2:3b",
+        model="phi3:mini",
         messages=messages,
         stream=True,
         options={"temperature": 0.7, "num_predict": 120}

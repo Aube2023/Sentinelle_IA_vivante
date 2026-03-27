@@ -101,7 +101,7 @@ def traiter_streaming(texte, sid):
 
     try:
         for chunk in ollama.chat(
-            model="llama3.2:3b",
+            model="phi3:mini",
             messages=messages,
             stream=True,
             options={"temperature": 0.7, "num_predict": 80}
