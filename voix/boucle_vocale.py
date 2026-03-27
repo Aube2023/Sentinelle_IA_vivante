@@ -38,7 +38,7 @@ def repondre(message: str, memoire: list, contexte_extra: str = "") -> str:
         model="llama3.2:3b",
         messages=messages,
         stream=True,
-        options={"temperature": 0.7, "num_predict": 80}
+        options={"temperature": 0.7, "num_predict": 120}
     ):
         token = chunk["message"]["content"]
         print(token, end="", flush=True)

@@ -12,7 +12,7 @@ def extraire_query(message: str) -> str:
                 f"Donne uniquement 3-4 mots-clés en français pour rechercher : {message}. UNIQUEMENT les mots-clés."}],
             options={"temperature": 0.1, "num_predict": 15}
         )
-        return r["message"]["content"].strip().replace("\n", " ")
+        return r["message"]["content"].strip().replace("\n", " ").replace("*", "").replace("-", "").strip()
     except:
         return message
 
