@@ -64,7 +64,7 @@ def reflechir(memoire: list) -> str:
 
     try:
         reponse = ollama.chat(
-            model="llama3.2:3b",
+            model="mistral",
             messages=[
                 {"role": "system", "content": PROMPT_REFLEXION},
                 {"role": "user", "content": f"Voici nos derniers échanges :\n{contexte}\n\nQu'est-ce que tu penses ?"}
@@ -85,7 +85,7 @@ def evoluer(memoire: list, pensees: list) -> str:
 
     try:
         reponse = ollama.chat(
-            model="llama3.2:3b",
+            model="mistral",
             messages=[
                 {"role": "user", "content": PROMPT_EVOLUTION.format(
                     pensees=dernieres_pensees,

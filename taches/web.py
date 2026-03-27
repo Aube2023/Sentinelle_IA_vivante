@@ -7,7 +7,7 @@ from ddgs import DDGS
 def extraire_query(message: str) -> str:
     try:
         r = ollama.chat(
-            model="llama3.2:3b",
+            model="mistral",
             messages=[{"role": "user", "content":
                 f"Donne uniquement 3-4 mots-clés en français pour rechercher : {message}. UNIQUEMENT les mots-clés."}],
             options={"temperature": 0.1, "num_predict": 15}

@@ -30,7 +30,7 @@ Réponds en JSON : {{"objectifs": ["obj 1", "obj 2", "obj 3"]}}"""
 def generer_idees_drones() -> list:
     try:
         r = ollama.chat(
-            model="llama3.2:3b",
+            model="mistral",
             messages=[{"role": "user", "content": PROMPT_IDEES_DRONES}],
             options={"temperature": 0.9, "num_predict": 200}
         )
@@ -50,7 +50,7 @@ def analyser_erreurs(memoire: list) -> dict:
     reponses = "\n".join([f"- {e['sentinelle'][:100]}" for e in memoire[-5:]])
     try:
         r = ollama.chat(
-            model="llama3.2:3b",
+            model="mistral",
             messages=[{"role": "user", "content": PROMPT_ANALYSE_ERREURS.format(reponses=reponses)}],
             options={"temperature": 0.7, "num_predict": 150}
         )
@@ -66,7 +66,7 @@ def analyser_erreurs(memoire: list) -> dict:
 def generer_objectifs_jour() -> list:
     try:
         r = ollama.chat(
-            model="llama3.2:3b",
+            model="mistral",
             messages=[{"role": "user", "content": PROMPT_OBJECTIFS.format(date=str(date.today()))}],
             options={"temperature": 0.8, "num_predict": 200}
         )
