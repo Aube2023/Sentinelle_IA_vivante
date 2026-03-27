@@ -44,7 +44,7 @@ def sentinelle_repond(message, historique):
     messages.append({"role": "user", "content": message})
     print("\n  SENTINELLE : ", end="", flush=True)
     reponse = ""
-    for chunk in ollama.chat(model="llama3", messages=messages, stream=True,
+    for chunk in ollama.chat(model="llama3.2:3b", messages=messages, stream=True,
                               options={"temperature": 0.8, "num_predict": 1024}):
         t = chunk["message"]["content"]
         print(t, end="", flush=True)
