@@ -11,7 +11,7 @@ def parler(texte: str):
     print(f"  SENTINELLE : {texte[:80]}{'...' if len(texte)>80 else ''}")
     # Nettoie le texte pour say
     texte_propre = texte.replace('"', '').replace("'", '').replace('\n', ' ')
-    subprocess.run(['say', '-v', 'Thomas', '-r', '180', texte_propre])
+    subprocess.run(['say', '-v', 'Thomas', '-r', '200', texte_propre])
 
 def moteur_actif():
     return "macos"
