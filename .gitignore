@@ -1,0 +1,7 @@
+__pycache__/
+*.pyc
+memoire/chromadb/
+memoire/historique.json
+memoire/pensees.json
+assets/nicolas.jpg
+venv/
