@@ -467,6 +467,7 @@ footer {
 <script>
 const socket = io();
 let micActif = false;
+let streamEl = null;
 let typingEl = null;
 
 // ── Connexion ──
@@ -477,6 +478,25 @@ socket.on('connect', () => {
 
 socket.on('disconnect', () => {
   setStatus('déconnecté', '');
+});
+
+socket.on('stream_start', () => {
+  retirerTyping();
+  streamEl = document.createElement('div');
+  streamEl.className = 'msg-wrapper sentinelle';
+  streamEl.innerHTML = '<div class="msg-avatar">S</div><div class="msg-content"><span class="msg-name">Sentinelle</span><div class="msg-bubble" id="stream-bubble"></div></div>';
+  document.getElementById('chat').appendChild(streamEl);
+  document.getElementById('chat').scrollTop = 99999;
+});
+
+socket.on('stream_token', data => {
+  const b = document.getElementById('stream-bubble');
+  if(b) { b.textContent += data.token; document.getElementById('chat').scrollTop = 99999; }
+});
+
+socket.on('stream_end', () => {
+  streamEl = null;
+  setStatus('prêt', 'online');
 });
 
 socket.on('message', data => {
