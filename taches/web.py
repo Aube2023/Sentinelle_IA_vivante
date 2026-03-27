@@ -1,87 +1,73 @@
 """
 taches/web.py — Sentinelle IA Vivante
-Recherche web automatique via DuckDuckGo (sans API key)
+Recherche web via DuckDuckGo + extraction intelligente de query
 """
-import requests, json, re
+import requests, ollama
+
+def extraire_query(message: str) -> str:
+    """Utilise le LLM pour extraire la vraie query de recherche."""
+    try:
+        r = ollama.chat(
+            model="llama3.2:3b",
+            messages=[{"role": "user", "content":
+                f"Extrait uniquement les mots-clés de recherche de cette phrase, sans mots inutiles, en 3-5 mots max. Réponds UNIQUEMENT avec les mots-clés, rien d'autre.\n\nPhrase: {message}"}],
+            options={"temperature": 0.1, "num_predict": 20}
+        )
+        return r["message"]["content"].strip()
+    except:
+        return message
 
 def rechercher(query: str, max_resultats: int = 3) -> list:
-    """
-    Recherche sur DuckDuckGo et retourne les résultats.
-    Pas besoin de clé API.
-    """
+    """Recherche sur DuckDuckGo."""
     try:
-        url = "https://api.duckduckgo.com/"
-        params = {
-            "q": query,
-            "format": "json",
-            "no_html": 1,
-            "skip_disambig": 1
-        }
-        r = requests.get(url, params=params, timeout=5)
+        r = requests.get(
+            "https://api.duckduckgo.com/",
+            params={"q": query, "format": "json", "no_html": 1, "skip_disambig": 1},
+            timeout=5
+        )
         data = r.json()
-
         resultats = []
 
-        # Réponse directe (définition, fait)
         if data.get("AbstractText"):
             resultats.append({
-                "titre": data.get("Heading", ""),
-                "texte": data["AbstractText"][:300],
-                "url": data.get("AbstractURL", "")
+                "titre": data.get("Heading", query),
+                "texte": data["AbstractText"][:300]
             })
 
-        # Résultats connexes
         for item in data.get("RelatedTopics", [])[:max_resultats]:
             if isinstance(item, dict) and item.get("Text"):
                 resultats.append({
-                    "titre": item.get("Text", "")[:80],
-                    "texte": item.get("Text", "")[:200],
-                    "url": item.get("FirstURL", "")
+                    "titre": item.get("Text", "")[:60],
+                    "texte": item.get("Text", "")[:200]
                 })
 
         return resultats[:max_resultats]
-
     except Exception as e:
-        return [{"titre": "Erreur", "texte": str(e), "url": ""}]
-
+        return []
 
 def formater_pour_llm(query: str, resultats: list) -> str:
-    """Formate les résultats pour que le LLM puisse les utiliser."""
     if not resultats:
-        return f"Aucun résultat trouvé pour : {query}"
-
-    texte = f"Résultats de recherche pour '{query}' :\n\n"
-    for i, r in enumerate(resultats, 1):
-        texte += f"{i}. {r['titre']}\n{r['texte']}\n\n"
+        return f"Aucun résultat pour : {query}"
+    texte = f"Résultats pour '{query}' :\n"
+    for r in resultats:
+        texte += f"- {r['texte']}\n"
     return texte
 
-
 def detecter_intention_recherche(message: str) -> str | None:
-    """
-    Détecte si le message demande une recherche web.
-    Retourne la query à chercher ou None.
-    """
     declencheurs = [
         "cherche", "recherche", "trouve", "googler",
-        "c'est quoi", "keskon", "qu'est-ce que",
-        "info sur", "actualité", "news", "météo",
-        "prix de", "comment faire", "qui est"
+        "c'est quoi", "qu'est-ce que", "info sur",
+        "actualité", "news", "météo", "prix de",
+        "qui est", "quoi de neuf"
     ]
     msg_lower = message.lower()
     for d in declencheurs:
         if d in msg_lower:
-            # Extrait la query — enlève le déclencheur
-            query = msg_lower
-            for mot in ["cherche", "recherche", "trouve", "dis-moi", "c'est quoi"]:
-                query = query.replace(mot, "").strip()
-            return query if len(query) > 2 else message
+            return extraire_query(message)
     return None
 
-
 if __name__ == "__main__":
-    print("Test recherche web\n")
-    resultats = rechercher("drones autonomes Canada 2024")
-    for r in resultats:
-        print(f"• {r['titre']}")
-        print(f"  {r['texte'][:100]}...")
-        print()
+    query = extraire_query("cherche des informations sur les drones autonomes au Canada")
+    print(f"Query extraite : {query}")
+    resultats = rechercher(query)
+    print(formater_pour_llm(query, resultats))

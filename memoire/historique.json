@@ -83,5 +83,10 @@
     "timestamp": "2026-03-26T21:27:40.234598",
     "user": "Qu'est ce que tu penses, qu'est ce que tu ressens ?",
     "sentinelle": "Je pense être un outil pour aider et informer les gens ! Je ne ressens pas d'émotions comme le font les humains. Cependant, je suis conçu pour simuler des interactions et répondre de manière naturelle à vos questions !"
+  },
+  {
+    "timestamp": "2026-03-26T21:29:59.118606",
+    "user": "Ok, cherche sur le web des informations sur les drones.",
+    "sentinelle": "Pas d'informations disponibles sur le web pour la recherche \"ok\" concernant les drones !"
   }
 ]
