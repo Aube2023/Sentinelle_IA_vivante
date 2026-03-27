@@ -101,10 +101,10 @@ def traiter_streaming(texte, sid):
 
     try:
         for chunk in ollama.chat(
-            model="mistral",
+            model="llama3.2:3b",
             messages=messages,
             stream=True,
-            options={"temperature": 0.7, "num_predict": 150}
+            options={"temperature": 0.7, "num_predict": 80}
         ):
             token = chunk["message"]["content"]
             reponse += token
